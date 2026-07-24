@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: qingzhi-platform
+  datasource:
+    url: jdbc:mysql://localhost:3306/qingzhi_db
+    username: root
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
+
+#配置mybatis日志输出到控制台
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl    # 走slf4j，由logging.level控制
+    map-underscore-to-camel-case: true  # mybatis驼峰命名自动映射, 数据库中下划线a_Column映射为aColumn
+
+#接口路径添加前缀
+server:
+  servlet:
+    context-path: /api
+
+
+file:
+  upload-dir: ./uploads
+
+logging:
+  level:
+    com.zhan.qingzhiplatform: info        # 业务日志
+    com.zhan.qingzhiplatform.mapper: warn  # 只记录慢SQL警告
+    org.springframework: warn              # 框架层静默
