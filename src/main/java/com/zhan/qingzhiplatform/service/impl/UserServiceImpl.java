@@ -143,11 +143,20 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUser(Long id) {
-        if (userMapper.getById(id) == null) throw new BusinessException("用户不存在");
-        favoriteMapper.deleteByUserId(id);
-        resourceMapper.deleteByUserId(id);
-        userMapper.deleteById(id);
-        log.info("删除用户及其关联数据: userId={}", id);
+        UserEntity user = userMapper.getById(id);
+        if (user == null) throw new BusinessException("用户不存在");
+        if (user.getRole() != null && user.getRole() == 2) {
+            throw new BusinessException("不能删除管理员账号");
+        }
+
+        // 先软删除该用户发布资源对应的全部收藏，再处理用户自己的收藏与资源。
+        favoriteMapper.softDeleteByResourceOwner(id);
+        favoriteMapper.softDeleteByUserId(id);
+        resourceMapper.softDeleteByUserId(id);
+        if (userMapper.softDeleteById(id) != 1) {
+            throw new BusinessException("用户删除失败");
+        }
+        log.info("软删除用户及其关联收藏和资源: userId={}", id);
     }
 
     /**

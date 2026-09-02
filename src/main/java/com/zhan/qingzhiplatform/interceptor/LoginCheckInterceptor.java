@@ -1,5 +1,6 @@
 package com.zhan.qingzhiplatform.interceptor;
 
+import com.zhan.qingzhiplatform.mapper.UserMapper;
 import com.zhan.qingzhiplatform.pojo.Result;
 import com.zhan.qingzhiplatform.util.JwtUtils;
 import io.jsonwebtoken.Claims;
@@ -19,9 +20,11 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     private final JwtUtils jwtUtils;
+    private final UserMapper userMapper;
 
-    public LoginCheckInterceptor(JwtUtils jwtUtils) {
+    public LoginCheckInterceptor(JwtUtils jwtUtils, UserMapper userMapper) {
         this.jwtUtils = jwtUtils;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -38,7 +41,7 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
             Claims claims = jwtUtils.parseJwt(token);
             Long userId = jwtUtils.getUserId(claims);
             Integer role = jwtUtils.getRole(claims);
-            if (userId == null || role == null) {
+            if (userId == null || role == null || userMapper.getById(userId) == null) {
                 return writeError(resp, "NOT_LOGIN");
             }
             req.setAttribute("userId", userId);

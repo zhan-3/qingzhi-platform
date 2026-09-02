@@ -1,5 +1,6 @@
 package com.zhan.qingzhiplatform.pojo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -58,6 +59,11 @@ public class ResourceEntity {
      * 更新时间
      */
     private LocalDateTime updatedAt;
+    /**
+     * 软删除时间；为空表示有效
+     */
+    @JsonIgnore
+    private LocalDateTime deletedAt;
     /**
      * 文件名 (联表查询, 非数据库字段)
      */

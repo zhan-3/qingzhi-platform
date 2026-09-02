@@ -71,6 +71,19 @@ class FavoriteServiceImplTest {
     }
 
     @Test
+    void restoresSoftDeletedFavoriteInsteadOfInsertingDuplicatePair() {
+        ResourceEntity resource = resourceWithStatus(ResourceEntity.STATUS_APPROVED);
+        when(resourceMapper.getById(2L)).thenReturn(resource);
+        when(favoriteMapper.exists(1L, 2L)).thenReturn(false);
+        when(favoriteMapper.restore(1L, 2L)).thenReturn(1);
+
+        favoriteService.addFavorite(1L, 2L);
+
+        verify(favoriteMapper).restore(1L, 2L);
+        verify(favoriteMapper, never()).insert(any());
+    }
+
+    @Test
     void duplicateKeyRaceReturnsFriendlyMessage() {
         ResourceEntity resource = resourceWithStatus(ResourceEntity.STATUS_APPROVED);
         when(resourceMapper.getById(2L)).thenReturn(resource);

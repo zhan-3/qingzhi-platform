@@ -13,24 +13,25 @@ public interface UserMapper {
             "VALUES(#{username}, #{password}, #{name}, #{phone}, #{email}, #{department}, #{major}, #{role}, #{status})")
     void insert(UserEntity user);
 
-    @Delete("delete from users WHERE id = #{id}")
-    void deleteById(Long id);
+    @Update("UPDATE users SET status = 0, deleted_at = CURRENT_TIMESTAMP " +
+            "WHERE id = #{id} AND deleted_at IS NULL")
+    int softDeleteById(Long id);
 
     void update(UserEntity user);
 
-    @Update("UPDATE users SET password=#{password} WHERE id=#{id}")
+    @Update("UPDATE users SET password=#{password} WHERE id=#{id} AND deleted_at IS NULL")
     void updatePassword(@Param("id") Long id, @Param("password") String password);
 
-    // 查询所有用户信息
-    @Select("SELECT * FROM users")
+    // 查询所有未删除用户信息
+    @Select("SELECT * FROM users WHERE deleted_at IS NULL")
     List<UserEntity> getUsers();
 
 
-    @Select("SELECT * FROM users WHERE username = #{username}")
+    @Select("SELECT * FROM users WHERE username = #{username} AND deleted_at IS NULL")
     UserEntity getByUsername(String username);
 
 
-    @Select("SELECT * FROM users WHERE id = #{id}")
+    @Select("SELECT * FROM users WHERE id = #{id} AND deleted_at IS NULL")
     UserEntity getById(Long id);
 
 

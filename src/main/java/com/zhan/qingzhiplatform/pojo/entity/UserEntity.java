@@ -64,4 +64,9 @@ public class UserEntity {
      * 更新时间
      */
     private LocalDateTime updatedAt;
+    /**
+     * 软删除时间；为空表示有效
+     */
+    @JsonIgnore
+    private LocalDateTime deletedAt;
 }

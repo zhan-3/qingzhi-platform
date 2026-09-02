@@ -15,7 +15,7 @@
             <if test="role != null">role = #{role},</if>
             <if test="status != null">status = #{status},</if>
         </set>
-        WHERE id = #{id}
+        WHERE id = #{id} AND deleted_at IS NULL
     </update>
 
 </mapper>

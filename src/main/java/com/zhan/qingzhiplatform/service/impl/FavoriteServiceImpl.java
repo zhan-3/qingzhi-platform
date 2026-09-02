@@ -49,6 +49,9 @@ public class FavoriteServiceImpl implements FavoriteService {
         if (favoriteMapper.exists(userId, resourceId)) {
             throw new BusinessException("已收藏");
         }
+        if (favoriteMapper.restore(userId, resourceId) == 1) {
+            return;
+        }
 
         FavoriteEntity f = new FavoriteEntity();
         f.setUserId(userId);
@@ -69,7 +72,7 @@ public class FavoriteServiceImpl implements FavoriteService {
      */
     @Override
     public void removeFavorite(Long userId, Long resourceId) {
-        favoriteMapper.deleteByUserAndResource(userId, resourceId);
+        favoriteMapper.softDeleteByUserAndResource(userId, resourceId);
     }
 
     /**

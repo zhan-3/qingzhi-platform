@@ -1,6 +1,7 @@
 package com.zhan.qingzhiplatform.service.impl;
 
 import com.zhan.qingzhiplatform.exception.BusinessException;
+import com.zhan.qingzhiplatform.mapper.FavoriteMapper;
 import com.zhan.qingzhiplatform.mapper.FileMapper;
 import com.zhan.qingzhiplatform.mapper.ResourceMapper;
 import com.zhan.qingzhiplatform.pojo.entity.ResourceEntity;
@@ -24,6 +25,9 @@ class ResourceServiceImplTest {
 
     @Mock
     private FileMapper fileMapper;
+
+    @Mock
+    private FavoriteMapper favoriteMapper;
 
     @InjectMocks
     private ResourceServiceImpl resourceService;
@@ -51,6 +55,20 @@ class ResourceServiceImplTest {
 
         assertEquals("请填写拒绝原因", error.getMessage());
         verify(resourceMapper, never()).updateAuditStatus(1L, ResourceEntity.STATUS_REJECTED, null);
+    }
+
+    @Test
+    void deletingResourceSoftDeletesFavoritesAndResource() {
+        ResourceEntity resource = new ResourceEntity();
+        resource.setId(1L);
+        resource.setUserId(7L);
+        when(resourceMapper.getById(1L)).thenReturn(resource);
+        when(resourceMapper.softDeleteById(1L)).thenReturn(1);
+
+        resourceService.deleteResource(1L, 7L);
+
+        verify(favoriteMapper).softDeleteByResourceId(1L);
+        verify(resourceMapper).softDeleteById(1L);
     }
 
     @Test

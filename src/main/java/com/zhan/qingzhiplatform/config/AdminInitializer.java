@@ -16,7 +16,7 @@ public class AdminInitializer implements CommandLineRunner {
 
     @Override
     public void run(String @NonNull ... args) {
-        if (userMapper.getByUsername("Admin") == null) {
+        if (!userMapper.existsByUsername("Admin")) {
             UserEntity admin = new UserEntity();
             admin.setUsername("Admin");
             admin.setPassword(SecurityUtils.encode("Admin2026"));

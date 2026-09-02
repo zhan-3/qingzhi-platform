@@ -6,12 +6,14 @@ import com.zhan.qingzhiplatform.pojo.PageResult;
 import com.zhan.qingzhiplatform.pojo.entity.ResourceEntity;
 import com.zhan.qingzhiplatform.pojo.dto.ResourceDTO;
 import com.zhan.qingzhiplatform.exception.BusinessException;
+import com.zhan.qingzhiplatform.mapper.FavoriteMapper;
 import com.zhan.qingzhiplatform.mapper.FileMapper;
 import com.zhan.qingzhiplatform.mapper.ResourceMapper;
 import com.zhan.qingzhiplatform.service.ResourceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -22,6 +24,9 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Autowired
     private FileMapper fileMapper;
+
+    @Autowired
+    private FavoriteMapper favoriteMapper;
 
     private void validateFileId(Long fileId) {
         if (fileId == null) throw new BusinessException("文件ID不能为空");
@@ -80,11 +85,15 @@ public class ResourceServiceImpl implements ResourceService {
      * @param userId 用户ID
      */
     @Override
+    @Transactional
     public void deleteResource(Long id, Long userId) {
         ResourceEntity r = resourceMapper.getById(id);
         if (r == null) throw new BusinessException("资源不存在");
         if (!r.getUserId().equals(userId)) throw new BusinessException("只能删除自己的资源");
-        resourceMapper.deleteById(id);
+        favoriteMapper.softDeleteByResourceId(id);
+        if (resourceMapper.softDeleteById(id) != 1) {
+            throw new BusinessException("资源删除失败");
+        }
     }
 
     /**
@@ -93,9 +102,13 @@ public class ResourceServiceImpl implements ResourceService {
      * @param id 资源ID
      */
     @Override
+    @Transactional
     public void deleteByAdmin(Long id) {
         if (resourceMapper.getById(id) == null) throw new BusinessException("资源不存在");
-        resourceMapper.deleteById(id);
+        favoriteMapper.softDeleteByResourceId(id);
+        if (resourceMapper.softDeleteById(id) != 1) {
+            throw new BusinessException("资源删除失败");
+        }
     }
 
     /**

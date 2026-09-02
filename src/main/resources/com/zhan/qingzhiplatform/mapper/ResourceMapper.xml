@@ -13,7 +13,7 @@
             <if test="status != null">status = #{status},</if>
             <if test="rejectReason != null">reject_reason = #{rejectReason},</if>
         </set>
-        WHERE id = #{id}
+        WHERE id = #{id} AND deleted_at IS NULL
     </update>
 
     <select id="getResources" resultType="com.zhan.qingzhiplatform.pojo.entity.ResourceEntity">
@@ -22,6 +22,8 @@
         LEFT JOIN files f ON r.file_id = f.id
         LEFT JOIN users u ON r.user_id = u.id
         <where>
+            r.deleted_at IS NULL
+            AND u.deleted_at IS NULL
             <if test='begin != null'> AND r.created_at &gt;= #{begin}</if>
             <if test='end != null'> AND r.created_at &lt;= #{end}</if>
             <if test='status != null'> AND r.status = #{status}</if>

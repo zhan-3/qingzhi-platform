@@ -13,27 +13,29 @@ public interface ResourceMapper {
     @Options(useGeneratedKeys = true, keyProperty = "id")
     void insert(ResourceEntity resource);
 
-    @Delete("DELETE FROM resources WHERE id = #{id}")
-    void deleteById(Long id);
+    @Update("UPDATE resources SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP " +
+            "WHERE id = #{id} AND deleted_at IS NULL")
+    int softDeleteById(Long id);
 
-    @Delete("DELETE FROM resources WHERE user_id = #{userId}")
-    void deleteByUserId(Long userId);
+    @Update("UPDATE resources SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP " +
+            "WHERE user_id = #{userId} AND deleted_at IS NULL")
+    int softDeleteByUserId(Long userId);
 
-    @Select("SELECT * FROM resources WHERE id = #{id}")
+    @Select("SELECT * FROM resources WHERE id = #{id} AND deleted_at IS NULL")
     ResourceEntity getById(Long id);
 
-    @Select("SELECT COUNT(*) > 0 FROM resources WHERE file_id = #{fileId}")
+    @Select("SELECT COUNT(*) > 0 FROM resources WHERE file_id = #{fileId} AND deleted_at IS NULL")
     boolean existsByFileId(Long fileId);
 
     @Select("SELECT COUNT(*) > 0 FROM resources " +
-            "WHERE file_id = #{fileId} AND (status = 1 OR user_id = #{userId})")
+            "WHERE file_id = #{fileId} AND deleted_at IS NULL AND (status = 1 OR user_id = #{userId})")
     boolean existsPreviewableByFileId(@Param("fileId") Long fileId,
                                       @Param("userId") Long userId);
 
     void update(ResourceEntity resource);
 
     @Update("UPDATE resources SET status = #{status}, reject_reason = #{reason}, " +
-            "updated_at = CURRENT_TIMESTAMP WHERE id = #{id}")
+            "updated_at = CURRENT_TIMESTAMP WHERE id = #{id} AND deleted_at IS NULL")
     int updateAuditStatus(@Param("id") Long id,
                           @Param("status") Integer status,
                           @Param("reason") String reason);
