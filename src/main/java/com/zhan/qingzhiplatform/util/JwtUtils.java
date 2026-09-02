@@ -3,62 +3,67 @@ package com.zhan.qingzhiplatform.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.Map;
 
+@Component
 public class JwtUtils {
-    // 加密密钥
-    private static final String secret = "replace-with-at-least-32-characters";
-    private static final SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 
+    private final SecretKey key;
+    private final long expirationMs;
+
+    public JwtUtils(@Value("${jwt.secret}") String secret,
+                    @Value("${jwt.expiration-ms:43200000}") long expirationMs) {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalArgumentException("JWT密钥不能为空");
+        }
+        if (expirationMs <= 0) {
+            throw new IllegalArgumentException("JWT有效期必须大于0");
+        }
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.expirationMs = expirationMs;
+    }
 
     /**
-     * 生成Jwt token
+     * 生成JWT令牌
      *
      * @param claims 载荷
-     * @return token
+     * @return JWT令牌
      */
-    public static String generateJwt(Map<String, Object> claims) {
-        Long expire = 43200000L;
+    public String generateJwt(Map<String, Object> claims) {
         return Jwts.builder()
                 .claims(claims)
                 .signWith(key, Jwts.SIG.HS256)
-                .expiration(new java.util.Date(System.currentTimeMillis() + expire)) // 12 hours expiration
+                .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .compact();
     }
 
     /**
-     * 解析Jwt token
+     * 验签并解析JWT令牌
      *
-     * @param jwt token
-     * @return 解析载荷
+     * @param jwt JWT令牌
+     * @return 已验证的载荷
      */
-    public static Claims ParseJwt(String jwt){
-        return Jwts.parser().
-                verifyWith(key).
-                build().
-                parseSignedClaims(jwt).
-                getPayload();
+    public Claims parseJwt(String jwt) {
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(jwt)
+                .getPayload();
     }
 
-    /**
-     * 获取token载荷角色
-     *
-     * @param token token
-     * @return 对应角色
-     */
-    public static Integer getRole(String token){
-        return (Integer) ParseJwt(token).get("role");
+    public Integer getRole(Claims claims) {
+        Object role = claims.get("role");
+        return role instanceof Number ? ((Number) role).intValue() : null;
     }
 
-    /**
-     * 获取token载荷用户ID
-     * @param token token
-     * @return 用户ID
-     */
-    public static Long getUserId(String token){
-        Object id = ParseJwt(token).get("userId");
-        return id instanceof Integer ? ((Integer) id).longValue() : (Long) id;
+    public Long getUserId(Claims claims) {
+        Object userId = claims.get("userId");
+        return userId instanceof Number ? ((Number) userId).longValue() : null;
     }
 }

@@ -16,11 +16,27 @@ public interface ResourceMapper {
     @Delete("DELETE FROM resources WHERE id = #{id}")
     void deleteById(Long id);
 
+    @Delete("DELETE FROM resources WHERE user_id = #{userId}")
+    void deleteByUserId(Long userId);
+
     @Select("SELECT * FROM resources WHERE id = #{id}")
     ResourceEntity getById(Long id);
 
+    @Select("SELECT COUNT(*) > 0 FROM resources WHERE file_id = #{fileId}")
+    boolean existsByFileId(Long fileId);
+
+    @Select("SELECT COUNT(*) > 0 FROM resources " +
+            "WHERE file_id = #{fileId} AND (status = 1 OR user_id = #{userId})")
+    boolean existsPreviewableByFileId(@Param("fileId") Long fileId,
+                                      @Param("userId") Long userId);
+
     void update(ResourceEntity resource);
 
+    @Update("UPDATE resources SET status = #{status}, reject_reason = #{reason}, " +
+            "updated_at = CURRENT_TIMESTAMP WHERE id = #{id}")
+    int updateAuditStatus(@Param("id") Long id,
+                          @Param("status") Integer status,
+                          @Param("reason") String reason);
 
     List<ResourceEntity> getResources(@Param("begin") String begin, @Param("end") String end,
                                       @Param("status") Integer status,

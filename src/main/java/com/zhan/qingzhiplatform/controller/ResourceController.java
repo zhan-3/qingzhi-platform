@@ -44,7 +44,7 @@ public class ResourceController {
      */
     @Operation(summary = "更新资源")
     @PutMapping("/{id}")
-    public Result updateResource(@PathVariable Long id, @RequestBody ResourceDTO dto, @RequestAttribute Long userId) {
+    public Result updateResource(@PathVariable Long id, @Valid @RequestBody ResourceDTO dto, @RequestAttribute Long userId) {
         return Result.success(resourceService.updateResource(id, dto, userId));
     }
 

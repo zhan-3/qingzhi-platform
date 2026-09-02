@@ -3,6 +3,7 @@ package com.zhan.qingzhiplatform.interceptor;
 import com.zhan.qingzhiplatform.pojo.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import tools.jackson.databind.ObjectMapper;
@@ -14,7 +15,7 @@ public class AdminCheckInterceptor implements HandlerInterceptor {
     private static final ObjectMapper mapper = new ObjectMapper();
 
 
-    public boolean preHandle(HttpServletRequest req, HttpServletResponse resp, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest req, @NonNull HttpServletResponse resp, @NonNull Object handler) throws Exception {
         Integer role = (Integer) req.getAttribute("role");
         if (role == null || role != 2) {
             resp.setContentType("application/json;charset=UTF-8");

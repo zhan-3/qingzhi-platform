@@ -58,4 +58,12 @@ public class ResourceEntity {
      * 更新时间
      */
     private LocalDateTime updatedAt;
+    /**
+     * 文件名 (联表查询, 非数据库字段)
+     */
+    private String fileName;
+    /**
+     * 发布者姓名 (联表查询, 非数据库字段)
+     */
+    private String userName;
 }

@@ -1,0 +1,11 @@
+/* 青知共享平台 - global resets */
+/* Element Plus provides component styles; this file covers only page-level defaults. */
+
+body {
+  margin: 0;
+}
+
+#app {
+  width: 100%;
+  min-height: 100vh;
+}

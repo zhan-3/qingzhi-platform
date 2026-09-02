@@ -14,6 +14,9 @@ public interface FavoriteMapper {
     @Delete("DELETE FROM favorites WHERE user_id = #{userId} AND resource_id = #{resourceId}")
     void deleteByUserAndResource(@Param("userId") Long userId, @Param("resourceId") Long resourceId);
 
+    @Delete("DELETE FROM favorites WHERE user_id = #{userId}")
+    void deleteByUserId(Long userId);
+
     @Select("SELECT COUNT(*) FROM favorites WHERE user_id = #{userId} AND resource_id = #{resourceId}")
     boolean exists(@Param("userId") Long userId, @Param("resourceId") Long resourceId);
 

@@ -31,6 +31,8 @@ public class AuthServiceImpl implements AuthService{
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private JwtUtils jwtUtils;
 
     /**
      * 用户注册
@@ -105,6 +107,6 @@ public class AuthServiceImpl implements AuthService{
         log.setSuccess(1);
         loginLogMapper.insert(log);
 
-        return JwtUtils.generateJwt(claims);
+        return jwtUtils.generateJwt(claims);
     }
 }

@@ -6,6 +6,7 @@ import com.zhan.qingzhiplatform.pojo.PageResult;
 import com.zhan.qingzhiplatform.pojo.entity.ResourceEntity;
 import com.zhan.qingzhiplatform.pojo.dto.ResourceDTO;
 import com.zhan.qingzhiplatform.exception.BusinessException;
+import com.zhan.qingzhiplatform.mapper.FileMapper;
 import com.zhan.qingzhiplatform.mapper.ResourceMapper;
 import com.zhan.qingzhiplatform.service.ResourceService;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,14 @@ public class ResourceServiceImpl implements ResourceService {
     @Autowired
     private ResourceMapper resourceMapper;
 
+    @Autowired
+    private FileMapper fileMapper;
+
+    private void validateFileId(Long fileId) {
+        if (fileId == null) throw new BusinessException("文件ID不能为空");
+        if (fileMapper.getById(fileId) == null) throw new BusinessException("文件不存在");
+    }
+
     /**
      * 上传资源
      *
@@ -28,6 +37,7 @@ public class ResourceServiceImpl implements ResourceService {
      */
     @Override
     public ResourceEntity publishResource(ResourceDTO dto, Long userId) {
+        validateFileId(dto.getFileId());
         ResourceEntity r = new ResourceEntity();
         r.setTitle(dto.getTitle());
         r.setDescription(dto.getDescription());
@@ -53,6 +63,7 @@ public class ResourceServiceImpl implements ResourceService {
         ResourceEntity r = resourceMapper.getById(id);
         if (r == null) throw new BusinessException("资源不存在");
         if (!r.getUserId().equals(userId)) throw new BusinessException("只能修改自己的资源");
+        validateFileId(dto.getFileId());
         r.setTitle(dto.getTitle());
         r.setDescription(dto.getDescription());
         r.setCourse(dto.getCourse());
@@ -111,11 +122,13 @@ public class ResourceServiceImpl implements ResourceService {
     public void auditResource(Long id, Integer status, String reason) {
         if (status != ResourceEntity.STATUS_APPROVED && status != ResourceEntity.STATUS_REJECTED)
             throw new BusinessException("审核状态无效");
+        if (status == ResourceEntity.STATUS_REJECTED && (reason == null || reason.isBlank()))
+            throw new BusinessException("请填写拒绝原因");
         ResourceEntity r = resourceMapper.getById(id);
         if (r == null) throw new BusinessException("资源不存在");
-        r.setStatus(status);
-        r.setRejectReason(status == ResourceEntity.STATUS_REJECTED ? reason : null);
-        resourceMapper.update(r);
+        String normalizedReason = status == ResourceEntity.STATUS_REJECTED ? reason.trim() : null;
+        int affected = resourceMapper.updateAuditStatus(id, status, normalizedReason);
+        if (affected != 1) throw new BusinessException("资源审核失败");
         log.info("审核资源: id={}, status={}", id, status);
     }
 

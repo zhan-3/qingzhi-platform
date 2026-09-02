@@ -21,6 +21,11 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(loginCheckInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns(
+                        "/",
+                        "/index.html",
+                        "/assets/**",
+                        "/favicon.svg",
+                        "/icons.svg",
                         "/login",
                         "/register",
                         "/swagger-ui.html",
@@ -32,4 +37,3 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/admin/**");
     }
 }
-

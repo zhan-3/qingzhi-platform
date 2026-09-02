@@ -1,6 +1,7 @@
 package com.zhan.qingzhiplatform.service;
 
-import java.util.List;
+import com.zhan.qingzhiplatform.pojo.PageResult;
+
 import java.util.Map;
 
 public interface FavoriteService {
@@ -8,5 +9,5 @@ public interface FavoriteService {
     void addFavorite(Long userId, Long resourceId);
     void removeFavorite(Long userId, Long resourceId);
     boolean isFavorited(Long userId, Long resourceId);
-    List<Map<String, Object>> listFavorites(Long userId);
+    PageResult<Map<String, Object>> listFavorites(Long userId, Integer page, Integer pageSize);
 }

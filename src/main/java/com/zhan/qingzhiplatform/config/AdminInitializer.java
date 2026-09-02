@@ -3,6 +3,7 @@ package com.zhan.qingzhiplatform.config;
 import com.zhan.qingzhiplatform.mapper.UserMapper;
 import com.zhan.qingzhiplatform.pojo.entity.UserEntity;
 import com.zhan.qingzhiplatform.util.SecurityUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -14,7 +15,7 @@ public class AdminInitializer implements CommandLineRunner {
     private UserMapper userMapper;
 
     @Override
-    public void run(String... args) {
+    public void run(String @NonNull ... args) {
         if (userMapper.getByUsername("Admin") == null) {
             UserEntity admin = new UserEntity();
             admin.setUsername("Admin");

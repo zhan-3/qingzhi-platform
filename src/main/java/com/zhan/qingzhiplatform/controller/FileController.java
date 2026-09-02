@@ -67,10 +67,22 @@ public class FileController {
         return Result.success(fileService.batchUploadFiles(files, userId));
     }
 
+    @DeleteMapping("/{id}")
+    @Operation(summary = "删除未被资源引用的文件")
+    public Result deleteFile(@PathVariable Long id,
+                             @RequestAttribute Long userId,
+                             @RequestAttribute Integer role) {
+        fileService.deleteFile(id, userId, role != null && role == 2);
+        return Result.success("删除成功");
+    }
+
     @GetMapping("/{id}/preview")
     @Operation(summary = "在线预览文件")
-    public ResponseEntity<Resource> preview(@PathVariable Long id) {
-        FileEntity file = fileService.getFileById(id);
+    public ResponseEntity<Resource> preview(@PathVariable Long id,
+                                            @RequestAttribute Long userId,
+                                            @RequestAttribute Integer role) {
+        boolean isAdmin = role != null && role == 2;
+        FileEntity file = fileService.getPreviewFile(id, userId, isAdmin);
         Path path = Paths.get(file.getFilePath());
 
         return ResponseEntity.ok()

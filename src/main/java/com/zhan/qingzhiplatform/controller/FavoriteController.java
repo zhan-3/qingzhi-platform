@@ -47,14 +47,18 @@ public class FavoriteController {
     }
 
     /**
-     * 查询个人收藏列表
+     * 分页查询个人收藏列表
      *
      * @param userId 用户个人ID
+     * @param page 当前页码
+     * @param pageSize 每页条数
      * @return 个人收藏列表
      */
     @GetMapping
-    @Operation(summary = "查询个人收藏列表")
-    public Result listFavorites(@RequestAttribute Long userId) {
-        return Result.success(favoriteService.listFavorites(userId));
+    @Operation(summary = "分页查询个人收藏列表")
+    public Result listFavorites(@RequestAttribute Long userId,
+                                @RequestParam(defaultValue = "1") Integer page,
+                                @RequestParam(defaultValue = "10") Integer pageSize) {
+        return Result.success(favoriteService.listFavorites(userId, page, pageSize));
     }
 }

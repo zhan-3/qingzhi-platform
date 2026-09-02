@@ -10,6 +10,8 @@ import com.zhan.qingzhiplatform.pojo.PageResult;
 import com.zhan.qingzhiplatform.pojo.entity.UserEntity;
 import com.zhan.qingzhiplatform.pojo.dto.UserImportDTO;
 import com.zhan.qingzhiplatform.exception.BusinessException;
+import com.zhan.qingzhiplatform.mapper.FavoriteMapper;
+import com.zhan.qingzhiplatform.mapper.ResourceMapper;
 import com.zhan.qingzhiplatform.mapper.UserMapper;
 import com.zhan.qingzhiplatform.service.UserService;
 import com.zhan.qingzhiplatform.util.SecurityUtils;
@@ -29,6 +31,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private FavoriteMapper favoriteMapper;
+
+    @Autowired
+    private ResourceMapper resourceMapper;
 
     /**
      * 创建用户
@@ -129,11 +137,18 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 删除用户
+     * 删除用户 (级联清理其收藏与发布的资源)
      * @param id 用户ID
      */
     @Override
-    public void deleteUser(Long id) { userMapper.deleteById(id); }
+    @Transactional
+    public void deleteUser(Long id) {
+        if (userMapper.getById(id) == null) throw new BusinessException("用户不存在");
+        favoriteMapper.deleteByUserId(id);
+        resourceMapper.deleteByUserId(id);
+        userMapper.deleteById(id);
+        log.info("删除用户及其关联数据: userId={}", id);
+    }
 
     /**
      * 分页查询用户
@@ -196,6 +211,9 @@ public class UserServiceImpl implements UserService {
         if (user == null) throw new BusinessException("用户不存在");
         if (!SecurityUtils.matches(oldPassword, user.getPassword())) {
             throw new BusinessException("原密码错误");
+        }
+        if (SecurityUtils.matches(newPassword, user.getPassword())) {
+            throw new BusinessException("新密码不能与原密码相同");
         }
         if (!SecurityUtils.isValidPassword(newPassword)) {
             throw new BusinessException("密码至少8位，包含数字和字母");

@@ -3,6 +3,7 @@ package com.zhan.qingzhiplatform.service.impl;
 import com.zhan.qingzhiplatform.pojo.entity.FileEntity;
 import com.zhan.qingzhiplatform.exception.BusinessException;
 import com.zhan.qingzhiplatform.mapper.FileMapper;
+import com.zhan.qingzhiplatform.mapper.ResourceMapper;
 import com.zhan.qingzhiplatform.service.FileService;
 import com.zhan.qingzhiplatform.util.Md5Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class FileServiceImpl implements FileService {
 
     @Autowired
     private FileMapper fileMapper;
+
+    @Autowired
+    private ResourceMapper resourceMapper;
 
     // 允许的文件类型
     private static final List<String> ALLOWED_TYPES = List.of(
@@ -148,13 +152,46 @@ public class FileServiceImpl implements FileService {
     }
 
     /**
-     * 删除文件
+     * 获取当前用户有权查看的预览文件
      *
      * @param id 文件ID
+     * @param userId 当前用户ID
+     * @param isAdmin 当前用户是否为管理员
+     * @return 文件信息
      */
     @Override
-    public void deleteFile(Long id) {
+    public FileEntity getPreviewFile(Long id, Long userId, boolean isAdmin) {
+        FileEntity file = getFileById(id);
+        if (!isAdmin && !resourceMapper.existsPreviewableByFileId(id, userId)) {
+            throw new BusinessException("无权预览该文件");
+        }
+        return file;
+    }
+
+    /**
+     * 删除未被资源引用的文件
+     *
+     * @param id 文件ID
+     * @param userId 当前用户ID
+     * @param isAdmin 当前用户是否为管理员
+     */
+    @Override
+    @Transactional
+    public void deleteFile(Long id, Long userId, boolean isAdmin) {
+        FileEntity file = getFileById(id);
+        if (!isAdmin && !userId.equals(file.getUploadUserId())) {
+            throw new BusinessException("只能删除自己上传的文件");
+        }
+        if (resourceMapper.existsByFileId(id)) {
+            throw new BusinessException("文件已被资源引用，请先删除关联资源");
+        }
+
         fileMapper.deleteById(id);
+        try {
+            Files.deleteIfExists(Paths.get(file.getFilePath()));
+        } catch (IOException e) {
+            throw new BusinessException("磁盘文件删除失败，数据库操作已回滚");
+        }
     }
 
 }
