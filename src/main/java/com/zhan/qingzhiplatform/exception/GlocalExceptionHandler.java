@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.stream.Collectors;
 
 @Slf4j
-@RestControllerAdvice
+@RestControllerAdvice  // 全局切面,作用于所有Controller
 public class GlocalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
