@@ -13,20 +13,20 @@ public interface FavoriteMapper {
 
     @Update("UPDATE favorites SET deleted_at = CURRENT_TIMESTAMP " +
             "WHERE user_id = #{userId} AND resource_id = #{resourceId} AND deleted_at IS NULL")
-    int softDeleteByUserAndResource(@Param("userId") Long userId, @Param("resourceId") Long resourceId);
+    void softDeleteByUserAndResource(@Param("userId") Long userId, @Param("resourceId") Long resourceId);
 
     @Update("UPDATE favorites SET deleted_at = CURRENT_TIMESTAMP " +
             "WHERE user_id = #{userId} AND deleted_at IS NULL")
-    int softDeleteByUserId(Long userId);
+    void softDeleteByUserId(Long userId);
 
     @Update("UPDATE favorites SET deleted_at = CURRENT_TIMESTAMP " +
             "WHERE resource_id = #{resourceId} AND deleted_at IS NULL")
-    int softDeleteByResourceId(Long resourceId);
+    void softDeleteByResourceId(Long resourceId);
 
     @Update("UPDATE favorites f JOIN resources r ON f.resource_id = r.id " +
             "SET f.deleted_at = CURRENT_TIMESTAMP " +
             "WHERE r.user_id = #{userId} AND f.deleted_at IS NULL")
-    int softDeleteByResourceOwner(Long userId);
+    void softDeleteByResourceOwner(Long userId);
 
     @Update("UPDATE favorites SET deleted_at = NULL, created_at = CURRENT_TIMESTAMP " +
             "WHERE user_id = #{userId} AND resource_id = #{resourceId} AND deleted_at IS NOT NULL")

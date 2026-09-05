@@ -19,7 +19,7 @@ public interface ResourceMapper {
 
     @Update("UPDATE resources SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP " +
             "WHERE user_id = #{userId} AND deleted_at IS NULL")
-    int softDeleteByUserId(Long userId);
+    void softDeleteByUserId(Long userId);
 
     @Select("SELECT * FROM resources WHERE id = #{id} AND deleted_at IS NULL")
     ResourceEntity getById(Long id);
